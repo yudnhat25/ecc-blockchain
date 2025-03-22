@@ -45,7 +45,8 @@
                 web3 = new Web3(window.ethereum);
                 userAccount = localStorage.getItem("userAccount");
                 if (userAccount) {
-                    document.getElementById("walletAddress").textContent = userAccount;
+                    const checksumAddress = web3.utils.toChecksumAddress(userAccount);
+                    document.getElementById("walletAddress").textContent = checksumAddress;
                 } else {
                     alert("No wallet connected. Please connect on the main page.");
                     window.location.href = "index.html";
@@ -62,7 +63,8 @@
                 try {
                     const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
                     userAccount = accounts[0];
-                    document.getElementById("walletAddress").textContent = userAccount;
+                    const checksumAddress = web3.utils.toChecksumAddress(userAccount);
+                    document.getElementById("walletAddress").textContent = checksumAddress;
                     localStorage.setItem("userAccount", userAccount);
                 } catch (error) {
                     console.error("User denied account access", error);
@@ -94,41 +96,61 @@
                     const encryptedData = JSON.parse(e.target.result);
                     console.log("Parsed encrypted data:", encryptedData);
 
-                    // Check if the file was encrypted with the current wallet's address
-                    if (encryptedData.address.toLowerCase() !== userAccount.toLowerCase()) {
-                        alert("This file was encrypted with a different wallet address!");
+                    if (!encryptedData.data || !encryptedData.filename || !encryptedData.address) {
+                        throw new Error("Invalid encrypted file format! Expected filename, data, and address.");
+                    }
+
+                    // Chuyển địa chỉ ví từ MetaMask thành dạng checksum
+                    const checksumUserAccount = web3.utils.toChecksumAddress(userAccount);
+
+                    // So sánh địa chỉ ví dưới dạng checksum
+                    if (encryptedData.address !== checksumUserAccount) {
+                        alert("This file was encrypted with a different wallet address! Expected: " + encryptedData.address);
                         return;
                     }
 
-                    // Use the Ethereum address as the decryption key
-                    const decryptionKey = userAccount;
+                    // Sử dụng địa chỉ ví dạng checksum làm khóa giải mã
+                    const decryptionKey = checksumUserAccount;
                     console.log("Decryption key (wallet address):", decryptionKey);
 
-                    // Decrypt the file content
-                    const decrypted = CryptoJS.AES.decrypt(encryptedData.data, decryptionKey);
-                    console.log("Decrypted object:", decrypted);
-
-                    // Convert decrypted data to a string (Base64 format)
-                    const decryptedBase64 = decrypted.toString(CryptoJS.enc.Utf8);
-                    console.log("Decrypted Base64 content:", decryptedBase64);
-
-                    if (!decryptedBase64) {
-                        alert("Decryption failed! Wrong wallet or corrupted file?");
-                        return;
+                    // Giải mã dữ liệu
+                    let decrypted;
+                    try {
+                        decrypted = CryptoJS.AES.decrypt(encryptedData.data, decryptionKey);
+                    } catch (error) {
+                        throw new Error("Decryption failed: Invalid key or corrupted data. " + error.message);
                     }
 
-                    // Convert Base64 back to binary
-                    const binaryString = atob(decryptedBase64);
+                    // Chuyển dữ liệu giải mã thành chuỗi Base64
+                    let decryptedBase64;
+                    try {
+                        decryptedBase64 = decrypted.toString(CryptoJS.enc.Utf8);
+                    } catch (error) {
+                        throw new Error("Failed to convert decrypted data to UTF-8: " + error.message);
+                    }
+
+                    if (!decryptedBase64) {
+                        throw new Error("Decryption failed: Invalid key or corrupted file!");
+                    }
+                    console.log("Decrypted Base64 content:", decryptedBase64);
+
+                    // Chuyển Base64 thành binary
+                    let binaryString;
+                    try {
+                        binaryString = atob(decryptedBase64);
+                    } catch (error) {
+                        throw new Error("Failed to decode Base64 content: " + error.message);
+                    }
                     console.log("Binary string length:", binaryString.length);
 
-                    // Convert binary string to Uint8Array
+                    // Chuyển binary string thành Uint8Array
                     const byteArray = new Uint8Array(binaryString.length);
                     for (let i = 0; i < binaryString.length; i++) {
                         byteArray[i] = binaryString.charCodeAt(i);
                     }
                     console.log("Byte array:", byteArray);
 
-                    // Create a Blob and trigger download
+                    // Tải file giải mã
                     const blob = new Blob([byteArray], { type: "application/octet-stream" });
                     const link = document.createElement("a");
                     link.href = URL.createObjectURL(blob);
