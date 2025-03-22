@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ECC File Decryption</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.7.4/web3.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; background-color: #f4f4f9; }
+        .container { width: 60%; margin: auto; text-align: left; background: white; padding: 20px; border-radius: 10px; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1); }
+        .file-input-container { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+        input, textarea { width: calc(100% - 20px); padding: 10px; margin: 10px 0; display: block; }
+        button { padding: 10px; margin-top: 10px; cursor: pointer; border: none; border-radius: 5px; font-weight: bold; }
+        .btn-primary { background-color: #007bff; color: white; }
+        .btn-primary:hover { background-color: #0056b3; }
+        .btn-danger { background-color: #dc3545; color: white; }
+        .btn-danger:hover { background-color: #a71d2a; }
+        .btn-back { background-color: #007bff; color: white; }
+        .btn-back:hover { background-color: #0056b3; }
+        h1, h2 { color: #333; }
+        p { font-size: 14px; color: #555; }
+    </style>
+</head>
+<body>
+    <h1>ECC File Decryption</h1>
+    <div class="container">
+        <h2>Connect to MetaMask</h2>
+        <button class="btn-primary" onclick="connectMetaMask()">Connect Wallet</button>
+        <p><strong>Wallet Address:</strong> <span id="walletAddress">Not Connected</span></p>
+
+        <h2>Decrypt File</h2>
+        <input type="file" id="encryptedFile">
+        <button class="btn-danger" onclick="decryptFile()">Decrypt & Download</button>
+
+        <button class="btn-back" onclick="goBack()">Back to Main Page</button>
+    </div>
+
+    <script>
+        let web3;
+        let userAccount;
+
+        window.onload = async function() {
+            if (window.ethereum) {
+                web3 = new Web3(window.ethereum);
+                userAccount = localStorage.getItem("userAccount");
+                if (userAccount) {
+                    document.getElementById("walletAddress").textContent = userAccount;
+                } else {
+                    alert("No wallet connected. Please connect on the main page.");
+                    window.location.href = "index.html";
+                }
+            } else {
+                alert("MetaMask is not installed. Please install it to use this feature.");
+                window.location.href = "index.html";
+            }
+        };
+
+        async function connectMetaMask() {
+            if (window.ethereum) {
+                web3 = new Web3(window.ethereum);
+                try {
+                    const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+                    userAccount = accounts[0];
+                    document.getElementById("walletAddress").textContent = userAccount;
+                    localStorage.setItem("userAccount", userAccount);
+                } catch (error) {
+                    console.error("User denied account access", error);
+                    alert("Failed to connect to MetaMask: " + error.message);
+                }
+            } else {
+                alert("MetaMask is not installed. Please install it to use this feature.");
+            }
+        }
+
+        function decryptFile() {
+            const fileInput = document.getElementById("encryptedFile").files[0];
+
+            if (!fileInput) {
+                alert("Please select an encrypted file!");
+                return;
+            }
+
+            if (!userAccount) {
+                alert("Please connect to MetaMask first!");
+                return;
+            }
+
+            const fileReader = new FileReader();
+
+            fileReader.onload = function(e) {
+                try {
+                    console.log("Encrypted file content:", e.target.result);
+                    const encryptedData = JSON.parse(e.target.result);
+                    console.log("Parsed encrypted data:", encryptedData);
+
+                    // Check if the file was encrypted with the current wallet's address
+                    if (encryptedData.address.toLowerCase() !== userAccount.toLowerCase()) {
+                        alert("This file was encrypted with a different wallet address!");
+                        return;
+                    }
+
+                    // Use the Ethereum address as the decryption key
+                    const decryptionKey = userAccount;
+                    console.log("Decryption key (wallet address):", decryptionKey);
+
+                    // Decrypt the file content
+                    const decrypted = CryptoJS.AES.decrypt(encryptedData.data, decryptionKey);
+                    console.log("Decrypted object:", decrypted);
+
+                    // Convert decrypted data to a string (Base64 format)
+                    const decryptedBase64 = decrypted.toString(CryptoJS.enc.Utf8);
+                    console.log("Decrypted Base64 content:", decryptedBase64);
+
+                    if (!decryptedBase64) {
+                        alert("Decryption failed! Wrong wallet or corrupted file?");
+                        return;
+                    }
+
+                    // Convert Base64 back to binary
+                    const binaryString = atob(decryptedBase64);
+                    console.log("Binary string length:", binaryString.length);
+
+                    // Convert binary string to Uint8Array
+                    const byteArray = new Uint8Array(binaryString.length);
+                    for (let i = 0; i < binaryString.length; i++) {
+                        byteArray[i] = binaryString.charCodeAt(i);
+                    }
+                    console.log("Byte array:", byteArray);
+
+                    // Create a Blob and trigger download
+                    const blob = new Blob([byteArray], { type: "application/octet-stream" });
+                    const link = document.createElement("a");
+                    link.href = URL.createObjectURL(blob);
+                    link.download = encryptedData.filename;
+                    link.click();
+                    console.log("Download triggered for decrypted file:", encryptedData.filename);
+                } catch (error) {
+                    console.error("Decryption failed:", error);
+                    alert("Decryption error: " + error.message);
+                }
+            };
+
+            fileReader.onerror = function(e) {
+                console.error("File reading failed:", e);
+                alert("Failed to read the encrypted file: " + e.target.error.message);
+            };
+
+            fileReader.readAsText(fileInput);
+        }
+
+        function goBack() {
+            window.location.href = "index.html";
+        }
+    </script>
+</body>
+</html>

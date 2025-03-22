@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ECC File Encryption</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; background-color: #f4f4f9; }
+        .container { width: 60%; margin: auto; text-align: left; background: white; padding: 20px; border-radius: 10px; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1); }
+        .file-input-container { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+        input, textarea { width: calc(100% - 20px); padding: 10px; margin: 10px 0; display: block; }
+        button { padding: 10px; margin-top: 10px; cursor: pointer; border: none; border-radius: 5px; font-weight: bold; }
+        .btn-success { background-color: #28a745; color: white; }
+        .btn-success:hover { background-color: #1e7e34; }
+        .btn-back { background-color: #007bff; color: white; }
+        .btn-back:hover { background-color: #0056b3; }
+        h1, h2 { color: #333; }
+        p { font-size: 14px; color: #555; }
+    </style>
+</head>
+<body>
+    <h1>ECC File Encryption</h1>
+    <div class="container">
+        <h2>Encrypt File</h2>
+        <input type="text" id="publicKey" placeholder="Enter Ethereum address (public key) for encryption" required>
+        <input type="file" id="fileToEncrypt">
+        <button class="btn-success" onclick="encryptFile()">Encrypt & Download</button>
+
+        <button class="btn-back" onclick="goBack()">Back to Main Page</button>
+    </div>
+
+    <script>
+        let originalFileName = "";
+
+        function encryptFile() {
+            const fileInput = document.getElementById("fileToEncrypt").files[0];
+            const publicKey = document.getElementById("publicKey").value.trim();
+
+            if (!fileInput) {
+                alert("Please select a file to encrypt!");
+                return;
+            }
+
+            if (!publicKey) {
+                alert("Please enter an Ethereum address (public key) for encryption!");
+                return;
+            }
+
+            // Basic validation for Ethereum address (starts with 0x, 42 characters long)
+            if (!publicKey.match(/^0x[a-fA-F0-9]{40}$/)) {
+                alert("Invalid Ethereum address! It should start with '0x' and be 42 characters long.");
+                return;
+            }
+
+            originalFileName = fileInput.name;
+            const fileReader = new FileReader();
+
+            fileReader.onload = function(e) {
+                try {
+                    console.log("File read successfully, size:", e.target.result.byteLength);
+                    const fileContent = new Uint8Array(e.target.result);
+                    console.log("File content as Uint8Array:", fileContent);
+
+                    // Convert file content to Base64
+                    const base64Content = CryptoJS.enc.Base64.stringify(CryptoJS.lib.WordArray.create(fileContent));
+                    console.log("Base64 content:", base64Content);
+
+                    // Use the provided public key (Ethereum address) as the encryption key
+                    const encryptionKey = publicKey;
+                    console.log("Encryption key (public key):", encryptionKey);
+
+                    // Encrypt the file content
+                    const encrypted = CryptoJS.AES.encrypt(base64Content, encryptionKey).toString();
+                    console.log("Encrypted content:", encrypted);
+
+                    // Create the file metadata
+                    const fileData = JSON.stringify({ filename: originalFileName, data: encrypted, address: publicKey });
+                    console.log("File metadata:", fileData);
+
+                    // Download the encrypted file
+                    downloadFile("Encrypted_File.txt", fileData);
+                    console.log("Download triggered for Encrypted_File.txt");
+                } catch (error) {
+                    console.error("Encryption failed:", error);
+                    alert("Encryption failed: " + error.message);
+                }
+            };
+
+            fileReader.onerror = function(e) {
+                console.error("File reading failed:", e);
+                alert("Failed to read the file: " + e.target.error.message);
+            };
+
+            fileReader.readAsArrayBuffer(fileInput);
+        }
+
+        function downloadFile(filename, content) {
+            try {
+                const blob = new Blob([content], { type: "text/plain" });
+                const link = document.createElement("a");
+                link.href = URL.createObjectURL(blob);
+                link.download = filename;
+                link.click();
+                console.log("Download link created and clicked for:", filename);
+            } catch (error) {
+                console.error("Download failed:", error);
+                alert("Failed to download the file: " + error.message);
+            }
+        }
+
+        function goBack() {
+            window.location.href = "index.html";
+        }
+    </script>
+</body>
+</html>

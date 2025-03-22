@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Signature</title>
+    <script src="https://unpkg.com/ethers@5.7.2/dist/ethers.umd.min.js" type="text/javascript"></script>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; background-color: #f4f4f9; }
+        .container { width: 60%; margin: auto; text-align: left; background: white; padding: 20px; border-radius: 10px; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1); }
+        input, textarea { width: calc(100% - 20px); padding: 10px; margin: 10px 0; display: block; }
+        button { padding: 10px; margin-top: 10px; cursor: pointer; border: none; border-radius: 5px; font-weight: bold; }
+        .btn-danger { background-color: #dc3545; color: white; }
+        .btn-danger:hover { background-color: #a71d2a; }
+        .btn-back { background-color: #007bff; color: white; }
+        .btn-back:hover { background-color: #0056b3; }
+        h1, h2 { color: #333; }
+        p { font-size: 14px; color: #555; }
+    </style>
+</head>
+<body>
+    <h1>Verify Signature</h1>
+    <div class="container">
+        <h2>Verify a Signature</h2>
+        <input type="text" id="publicKey" placeholder="Enter Ethereum address to verify against" required>
+        <textarea id="messageToVerify" placeholder="Enter message to verify..."></textarea>
+        <input type="text" id="signatureToVerify" placeholder="Enter signature">
+        <button class="btn-danger" onclick="verifySignature()">Verify</button>
+        <p><strong>Verification Result:</strong> <span id="verificationResult"></span></p>
+        <button class="btn-back" onclick="goBack()">Back to Main Page</button>
+    </div>
+
+    <script>
+        function verifySignature() {
+            const message = document.getElementById("messageToVerify").value;
+            const signature = document.getElementById("signatureToVerify").value;
+            const publicKeyInput = document.getElementById("publicKey").value;
+
+            if (!message || !signature || !publicKeyInput) {
+                alert("Please enter the Ethereum address, message, and signature!");
+                return;
+            }
+
+            try {
+                // Use ethers.js to recover the address from the message and signature
+                const recoveredAddress = ethers.utils.verifyMessage(message, signature);
+
+                // Compare the recovered address with the provided address
+                document.getElementById("verificationResult").textContent = 
+                    (recoveredAddress.toLowerCase() === publicKeyInput.toLowerCase()) 
+                    ? "✅ Signature is valid" 
+                    : "❌ Signature is invalid";
+            } catch (error) {
+                alert("Verification failed: " + error.message);
+            }
+        }
+
+        function goBack() {
+            window.location.href = "index.html";
+        }
+    </script>
+</body>
+</html>

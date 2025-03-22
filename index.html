@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ECC Blockchain Integration</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.7.4/web3.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; background-color: #f4f4f9; }
+        .container { width: 60%; margin: auto; text-align: left; background: white; padding: 20px; border-radius: 10px; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1); }
+        input, textarea { width: calc(100% - 20px); padding: 10px; margin: 10px 0; display: block; }
+        button { padding: 10px; margin-top: 10px; cursor: pointer; border: none; border-radius: 5px; font-weight: bold; }
+        .btn-primary { background-color: #007bff; color: white; }
+        .btn-primary:hover { background-color: #0056b3; }
+        .btn-success { background-color: #28a745; color: white; }
+        .btn-success:hover { background-color: #1e7e34; }
+        .btn-danger { background-color: #dc3545; color: white; }
+        .btn-danger:hover { background-color: #a71d2a; }
+        h1, h2 { color: #333; }
+        p { font-size: 14px; color: #555; }
+    </style>
+</head>
+<body>
+    <h1>ECC Blockchain Integration</h1>
+    <div class="container">
+        <h2>Connect to MetaMask</h2>
+        <button class="btn-primary" onclick="connectMetaMask()">Connect Wallet</button>
+        <p><strong>Wallet Address:</strong> <span id="walletAddress">Not Connected</span></p>
+        
+        <h2>Sign Message</h2>
+        <button class="btn-success" onclick="goToSignPage()">Go to Sign Message</button>
+        
+        <h2>Verify Signature</h2>
+        <button class="btn-danger" onclick="goToVerifyPage()">Go to Verify Signature</button>
+
+        <h2>Encrypt File</h2>
+        <button class="btn-success" onclick="goToEncryptPage()">Go to Encrypt File</button>
+
+        <h2>Decrypt File</h2>
+        <button class="btn-danger" onclick="goToDecryptPage()">Go to Decrypt File</button>
+    </div>
+
+    <script>
+        let web3;
+        let userAccount;
+
+        async function connectMetaMask() {
+            if (window.ethereum) {
+                web3 = new Web3(window.ethereum);
+                try {
+                    const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+                    userAccount = accounts[0];
+                    document.getElementById("walletAddress").textContent = userAccount;
+                    localStorage.setItem("userAccount", userAccount);
+                } catch (error) {
+                    console.error("User denied account access", error);
+                }
+            } else {
+                alert("MetaMask is not installed. Please install it to use this feature.");
+            }
+        }
+
+        function goToSignPage() {
+            if (!userAccount) {
+                alert("Please connect to MetaMask first!");
+                return;
+            }
+            window.location.href = "sign.html";
+        }
+
+        function goToVerifyPage() {
+            window.location.href = "verify.html";
+        }
+
+        function goToEncryptPage() {
+            window.location.href = "encrypt.html";
+        }
+
+        function goToDecryptPage() {
+            if (!userAccount) {
+                alert("Please connect to MetaMask first!");
+                return;
+            }
+            window.location.href = "decrypt.html";
+        }
+    </script>
+</body>
+</html>
