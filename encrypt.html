@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ECC File Encryption</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.7.4/web3.min.js"></script>
     <style>
         body { font-family: Arial, sans-serif; text-align: center; padding: 20px; background-color: #f4f4f9; }
         .container { width: 60%; margin: auto; text-align: left; background: white; padding: 20px; border-radius: 10px; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1); }
@@ -31,6 +32,7 @@
     </div>
 
     <script>
+        let web3 = new Web3(); // Khởi tạo Web3 để sử dụng toChecksumAddress
         let originalFileName = "";
 
         function encryptFile() {
@@ -47,9 +49,18 @@
                 return;
             }
 
-            // Basic validation for Ethereum address (starts with 0x, 42 characters long)
+            // Kiểm tra địa chỉ ví hợp lệ
             if (!publicKey.match(/^0x[a-fA-F0-9]{40}$/)) {
                 alert("Invalid Ethereum address! It should start with '0x' and be 42 characters long.");
+                return;
+            }
+
+            // Chuyển địa chỉ ví thành dạng checksum (giữ chữ hoa/thường)
+            let checksumPublicKey;
+            try {
+                checksumPublicKey = web3.utils.toChecksumAddress(publicKey);
+            } catch (error) {
+                alert("Invalid Ethereum address format: " + error.message);
                 return;
             }
 
@@ -62,23 +73,23 @@
                     const fileContent = new Uint8Array(e.target.result);
                     console.log("File content as Uint8Array:", fileContent);
 
-                    // Convert file content to Base64
+                    // Chuyển nội dung file thành Base64
                     const base64Content = CryptoJS.enc.Base64.stringify(CryptoJS.lib.WordArray.create(fileContent));
                     console.log("Base64 content:", base64Content);
 
-                    // Use the provided public key (Ethereum address) as the encryption key
-                    const encryptionKey = publicKey;
+                    // Sử dụng địa chỉ ví dạng checksum làm khóa mã hóa
+                    const encryptionKey = checksumPublicKey;
                     console.log("Encryption key (public key):", encryptionKey);
 
-                    // Encrypt the file content
+                    // Mã hóa nội dung file
                     const encrypted = CryptoJS.AES.encrypt(base64Content, encryptionKey).toString();
                     console.log("Encrypted content:", encrypted);
 
-                    // Create the file metadata
-                    const fileData = JSON.stringify({ filename: originalFileName, data: encrypted, address: publicKey });
+                    // Lưu dữ liệu mã hóa với địa chỉ ví dạng checksum
+                    const fileData = JSON.stringify({ filename: originalFileName, data: encrypted, address: checksumPublicKey });
                     console.log("File metadata:", fileData);
 
-                    // Download the encrypted file
+                    // Tải file mã hóa
                     downloadFile("Encrypted_File.txt", fileData);
                     console.log("Download triggered for Encrypted_File.txt");
                 } catch (error) {
