@@ -50,10 +50,13 @@
                 try {
                     const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
                     userAccount = accounts[0];
-                    document.getElementById("walletAddress").textContent = userAccount;
+                    // Chuyển địa chỉ ví thành dạng checksum (giữ chữ hoa/thường)
+                    const checksumAddress = web3.utils.toChecksumAddress(userAccount);
+                    document.getElementById("walletAddress").textContent = checksumAddress;
                     localStorage.setItem("userAccount", userAccount);
                 } catch (error) {
                     console.error("User denied account access", error);
+                    alert("Failed to connect to MetaMask: " + error.message);
                 }
             } else {
                 alert("MetaMask is not installed. Please install it to use this feature.");
