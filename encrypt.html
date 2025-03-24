@@ -6,33 +6,165 @@
     <title>ECC File Encryption</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.7.4/web3.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; background-color: #f4f4f9; }
-        .container { width: 60%; margin: auto; text-align: left; background: white; padding: 20px; border-radius: 10px; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1); }
-        .file-input-container { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-        input, textarea { width: calc(100% - 20px); padding: 10px; margin: 10px 0; display: block; }
-        button { padding: 10px; margin-top: 10px; cursor: pointer; border: none; border-radius: 5px; font-weight: bold; }
-        .btn-success { background-color: #28a745; color: white; }
-        .btn-success:hover { background-color: #1e7e34; }
-        .btn-back { background-color: #007bff; color: white; }
-        .btn-back:hover { background-color: #0056b3; }
-        h1, h2 { color: #333; }
-        p { font-size: 14px; color: #555; }
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            background: white;
+            padding: 32px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        nav {
+            background: linear-gradient(90deg, #1e3a8a, #3b82f6);
+            padding: 16px 32px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: white;
+            font-weight: 700;
+            font-size: 1.25rem;
+        }
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            transition: background-color 0.2s;
+        }
+        .nav-links a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        h1 {
+            color: #1e3a8a;
+            font-size: 2rem;
+            margin-bottom: 24px;
+            font-weight: 700;
+            text-align: center;
+        }
+        h2 {
+            color: #1f2937;
+            font-size: 1.5rem;
+            margin: 32px 0 16px;
+            font-weight: 500;
+        }
+        .section {
+            padding: 24px;
+            background: #f9fafb;
+            border-radius: 8px;
+            margin-bottom: 24px;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 1rem;
+            margin-bottom: 16px;
+            box-sizing: border-box;
+        }
+        .file-input-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        input[type="file"] {
+            padding: 8px 0;
+            font-size: 1rem;
+        }
+        button {
+            padding: 10px 24px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-success {
+            background-color: #10b981;
+            color: white;
+        }
+        .btn-success:hover {
+            background-color: #059669;
+        }
+        .btn-back {
+            background-color: #6b7280;
+            color: white;
+        }
+        .btn-back:hover {
+            background-color: #4b5563;
+        }
+        p {
+            color: #4b5563;
+            margin: 8px 0;
+            font-size: 0.95rem;
+        }
+        p strong {
+            color: #1f2937;
+        }
     </style>
 </head>
 <body>
-    <h1>ECC File Encryption</h1>
+    <nav>
+        <div class="nav-container">
+            <div class="nav-logo">
+                <div class="bg-white rounded-full w-5 h-5"></div>
+                <span>GROUP 1</span>
+            </div>
+            <div class="nav-links space-x-2">
+                <a href="index.html">Home</a>
+                <a href="#" onclick = "navigateTo('sign.html'); return false ;"><strong>Sign</strong></a>
+                <a href="verify.html">Verify</a>
+                <a href="encrypt.html">Encrypt</a>
+                <a href="#"onclick="navigateTo('decrypt.html'); return false;">Decrypt</a>
+            </div>
+        </div>
+    </nav>
     <div class="container">
-        <h2>Encrypt File</h2>
-        <input type="text" id="publicKey" placeholder="Enter Ethereum address (public key) for encryption" required>
-        <input type="file" id="fileToEncrypt">
-        <button class="btn-success" onclick="encryptFile()">Encrypt & Download</button>
+        <h1>ECC File Encryption</h1>
 
-        <button class="btn-back" onclick="goBack()">Back to Main Page</button>
+        <div class="section">
+            <h2>Encrypt File</h2>
+            <input type="text" id="publicKey" placeholder="Enter Ethereum address (public key) for encryption" required>
+            <div class="file-input-container">
+                <i class="fas fa-file-upload"></i>
+                <input type="file" id="fileToEncrypt">
+            </div>
+            <button class="btn-success" onclick="encryptFile()">
+                <i class="fas fa-lock"></i> Encrypt & Download
+            </button>
+        </div>
+
+        <button class="btn-back" onclick="goBack()">
+            <i class="fas fa-arrow-left"></i> Back to Main Page
+        </button>
     </div>
 
     <script>
-        let web3 = new Web3(); // Khởi tạo Web3 để sử dụng toChecksumAddress
+        let web3 = new Web3();
         let originalFileName = "";
 
         function encryptFile() {
@@ -49,13 +181,11 @@
                 return;
             }
 
-            // Kiểm tra địa chỉ ví hợp lệ
             if (!publicKey.match(/^0x[a-fA-F0-9]{40}$/)) {
                 alert("Invalid Ethereum address! It should start with '0x' and be 42 characters long.");
                 return;
             }
 
-            // Chuyển địa chỉ ví thành dạng checksum (giữ chữ hoa/thường)
             let checksumPublicKey;
             try {
                 checksumPublicKey = web3.utils.toChecksumAddress(publicKey);
@@ -73,23 +203,18 @@
                     const fileContent = new Uint8Array(e.target.result);
                     console.log("File content as Uint8Array:", fileContent);
 
-                    // Chuyển nội dung file thành Base64
                     const base64Content = CryptoJS.enc.Base64.stringify(CryptoJS.lib.WordArray.create(fileContent));
                     console.log("Base64 content:", base64Content);
 
-                    // Sử dụng địa chỉ ví dạng checksum làm khóa mã hóa
                     const encryptionKey = checksumPublicKey;
                     console.log("Encryption key (public key):", encryptionKey);
 
-                    // Mã hóa nội dung file
                     const encrypted = CryptoJS.AES.encrypt(base64Content, encryptionKey).toString();
                     console.log("Encrypted content:", encrypted);
 
-                    // Lưu dữ liệu mã hóa với địa chỉ ví dạng checksum
                     const fileData = JSON.stringify({ filename: originalFileName, data: encrypted, address: checksumPublicKey });
                     console.log("File metadata:", fileData);
 
-                    // Tải file mã hóa
                     downloadFile("Encrypted_File.txt", fileData);
                     console.log("Download triggered for Encrypted_File.txt");
                 } catch (error) {
