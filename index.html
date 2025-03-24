@@ -1,59 +1,191 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ECC Blockchain Integration</title>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Cybersecurity Bootcamp</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.7.4/web3.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet"/>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; background-color: #f4f4f9; }
-        .container { width: 60%; margin: auto; text-align: left; background: white; padding: 20px; border-radius: 10px; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1); }
-        input, textarea { width: calc(100% - 20px); padding: 10px; margin: 10px 0; display: block; }
-        button { padding: 10px; margin-top: 10px; cursor: pointer; border: none; border-radius: 5px; font-weight: bold; }
-        .btn-primary { background-color: #007bff; color: white; }
-        .btn-primary:hover { background-color: #0056b3; }
-        .btn-success { background-color: #28a745; color: white; }
-        .btn-success:hover { background-color: #1e7e34; }
-        .btn-danger { background-color: #dc3545; color: white; }
-        .btn-danger:hover { background-color: #a71d2a; }
-        h1, h2 { color: #333; }
-        p { font-size: 14px; color: #555; }
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100vh; /* Chiều cao full màn hình */
+            width: 100vw; /* Chiều rộng full màn hình */
+            overflow-x: hidden; /* Ngăn thanh cuộn ngang */
+        }
+        nav {
+            background: linear-gradient(90deg, #1e3a8a, #3b82f6);
+            padding: 16px 32px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: white;
+            font-weight: 700;
+            font-size: 1.25rem;
+        }
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            transition: background-color 0.2s;
+        }
+        .nav-links a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-image: url('background.png'); /* Đường dẫn đến file hình nền cục bộ */
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            flex-direction: column;
+        }
+        /* Header full width */
+        header {
+            width: 100%;
+        }
+        /* Main full height and width */
+        main {
+            flex: 1; /* Chiếm toàn bộ không gian còn lại */
+            display: flex;
+            flex-direction: column;
+            justify-content: center; /* Căn giữa theo chiều dọc */
+            align-items: center; /* Căn giữa theo chiều ngang */
+            width: 100%;
+        }
+        /* Hiệu ứng 3D cho khung nút Connect to MetaMask */
+        .connect-button {
+            position: relative;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3), 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+        .connect-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.4), 0 6px 10px rgba(0, 0, 0, 0.3);
+        }
+        .connect-button:active {
+            transform: translateY(2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2), 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        /* Hiệu ứng nhấn cho biểu tượng con chuột */
+        .mouse-pointer {
+            display: inline-block;
+            animation: clickMouse 1.5s infinite ease-in-out;
+        }
+        @keyframes clickMouse {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(5px);
+            }
+        }
+        /* Style cho các nút Sign, Verify, Encrypt, Decrypt */
+        .action-button {
+            border: 4px solid rgba(0, 191, 255, 0.7); /* Độ dày viền 4px */
+            background-color: rgba(0, 0, 0, 0.3);
+            color: white;
+            font-weight: bold;
+            font-size: 1.5rem;
+            padding: 1rem;
+            border-radius: 15px;
+            transition: all 0.3s ease;
+            text-align: center;
+            min-height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%; /* Chiếm toàn bộ chiều rộng của cột */
+            cursor: pointer; /* Thêm con trỏ tay khi hover */
+        }
+        .action-button:hover {
+            background-color: rgba(0, 191, 255, 0.2);
+            border-color: rgba(0, 191, 255, 1);
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(0, 191, 255, 0.5);
+        }
+        /* Điều chỉnh lưới cho full màn hình */
+        .action-grid {
+            width: 100%;
+            max-width: 1200px; /* Giới hạn chiều rộng tối đa để không quá rộng trên màn hình lớn */
+            display: grid;
+            grid-template-columns: repeat(4, 1fr); /* 4 cột trên màn hình lớn */
+            gap: 2rem; /* Khoảng cách giữa các ô */
+            padding: 0 1rem;
+        }
+        /* Responsive cho màn hình nhỏ */
+        @media (max-width: 768px) {
+            .action-grid {
+                grid-template-columns: repeat(2, 1fr); /* 2 cột trên màn hình nhỏ */
+                gap: 1.5rem; /* Khoảng cách trên màn hình nhỏ */
+            }
+        }
     </style>
 </head>
-<body>
-    <h1>ECC Blockchain Integration</h1>
-    <div class="container">
-        <h2>Connect to MetaMask</h2>
-        <button class="btn-primary" onclick="connectMetaMask()">Connect Wallet</button>
-        <p><strong>Wallet Address:</strong> <span id="walletAddress">Not Connected</span></p>
-        
-        <h2>Sign Message</h2>
-        <button class="btn-success" onclick="goToSignPage()">Go to Sign Message</button>
-        
-        <h2>Verify Signature</h2>
-        <button class="btn-danger" onclick="goToVerifyPage()">Go to Verify Signature</button>
-
-        <h2>Encrypt File</h2>
-        <button class="btn-success" onclick="goToEncryptPage()">Go to Encrypt File</button>
-
-        <h2>Decrypt File</h2>
-        <button class="btn-danger" onclick="goToDecryptPage()">Go to Decrypt File</button>
-    </div>
+<body class="bg-blue-900 text-white">
+    <header>
+        <nav>
+            <div class="nav-container">
+                <div class="nav-logo">
+                    <div class="bg-white rounded-full w-5 h-5"></div>
+                    <span>GROUP 1</span>
+                </div>
+                <div class="nav-links space-x-2">
+                    <a href="#"><strong>Home</strong></a>
+                    <a href="#" onclick = "navigateTo('sign.html'); return False ;">Sign</a>
+                    <a href="verify.html">Verify</a>
+                    <a href="encrypt.html">Encrypt</a>
+                    <a href="#"onclick="navigateTo('decrypt.html'); return false;">Decrypt</a>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <main>
+        <section class="text-center">
+            <h1 class="text-8xl font-bold">CYBERSECURITY</h1>
+            <div class="mt-12 inline-block bg-blue-600 py-2 px-4 rounded-full cursor-pointer connect-button" onclick="connectMetaMask()">
+                <span class="text-xl font-bold">CONNECT TO META MASK</span>
+                <i class="fas fa-mouse-pointer ml-2 mouse-pointer"></i>
+            </div>
+            <p class="mt-12 text-lg"><strong>Wallet Address:</strong> <span id="walletAddress">Not Connected</span></p>
+        </section>
+        <section class="mt-12 action-grid">
+            <div class="action-button" onclick="navigateTo('sign.html')">SIGN</div>
+            <a href="verify.html" class="action-button">VERIFY</a>
+            <a href="encrypt.html" class="action-button">ENCRYPT</a>
+            <div class="action-button" onclick="navigateTo('decrypt.html')">DECRYPT</div>
+        </section>
+    </main>
 
     <script>
         let web3;
         let userAccount;
 
+        // Hàm kết nối MetaMask
         async function connectMetaMask() {
             if (window.ethereum) {
                 web3 = new Web3(window.ethereum);
                 try {
                     const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
                     userAccount = accounts[0];
-                    // Chuyển địa chỉ ví thành dạng checksum (giữ chữ hoa/thường)
                     const checksumAddress = web3.utils.toChecksumAddress(userAccount);
                     document.getElementById("walletAddress").textContent = checksumAddress;
-                    localStorage.setItem("userAccount", userAccount);
+                    localStorage.setItem("userAccount", userAccount); // Lưu địa chỉ ví vào localStorage
+                    alert("Connected to MetaMask successfully!");
                 } catch (error) {
                     console.error("User denied account access", error);
                     alert("Failed to connect to MetaMask: " + error.message);
@@ -63,28 +195,13 @@
             }
         }
 
-        function goToSignPage() {
+        // Hàm điều hướng với kiểm tra kết nối MetaMask (chỉ cho Sign và Decrypt)
+        function navigateTo(page) {
             if (!userAccount) {
                 alert("Please connect to MetaMask first!");
                 return;
             }
-            window.location.href = "sign.html";
-        }
-
-        function goToVerifyPage() {
-            window.location.href = "verify.html";
-        }
-
-        function goToEncryptPage() {
-            window.location.href = "encrypt.html";
-        }
-
-        function goToDecryptPage() {
-            if (!userAccount) {
-                alert("Please connect to MetaMask first!");
-                return;
-            }
-            window.location.href = "decrypt.html";
+            window.location.href = page;
         }
     </script>
 </body>
