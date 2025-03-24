@@ -6,34 +6,166 @@
     <title>ECC File Decryption</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.7.4/web3.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; background-color: #f4f4f9; }
-        .container { width: 60%; margin: auto; text-align: left; background: white; padding: 20px; border-radius: 10px; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1); }
-        .file-input-container { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-        input, textarea { width: calc(100% - 20px); padding: 10px; margin: 10px 0; display: block; }
-        button { padding: 10px; margin-top: 10px; cursor: pointer; border: none; border-radius: 5px; font-weight: bold; }
-        .btn-primary { background-color: #007bff; color: white; }
-        .btn-primary:hover { background-color: #0056b3; }
-        .btn-danger { background-color: #dc3545; color: white; }
-        .btn-danger:hover { background-color: #a71d2a; }
-        .btn-back { background-color: #007bff; color: white; }
-        .btn-back:hover { background-color: #0056b3; }
-        h1, h2 { color: #333; }
-        p { font-size: 14px; color: #555; }
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            background: white;
+            padding: 32px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        nav {
+            background: linear-gradient(90deg, #1e3a8a, #3b82f6);
+            padding: 16px 32px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: white;
+            font-weight: 700;
+            font-size: 1.25rem;
+        }
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            transition: background-color 0.2s;
+        }
+        .nav-links a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        h1 {
+            color: #1e3a8a;
+            font-size: 2rem;
+            margin-bottom: 24px;
+            font-weight: 700;
+            text-align: center;
+        }
+        h2 {
+            color: #1f2937;
+            font-size: 1.5rem;
+            margin: 32px 0 16px;
+            font-weight: 500;
+        }
+        .section {
+            padding: 24px;
+            background: #f9fafb;
+            border-radius: 8px;
+            margin-bottom: 24px;
+        }
+        .file-input-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        input[type="file"] {
+            padding: 8px 0;
+            font-size: 1rem;
+        }
+        button {
+            padding: 10px 24px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-primary {
+            background-color: #3b82f6;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #1d4ed8;
+        }
+        .btn-danger {
+            background-color: #ef4444;
+            color: white;
+        }
+        .btn-danger:hover {
+            background-color: #dc2626;
+        }
+        .btn-back {
+            background-color: #6b7280;
+            color: white;
+        }
+        .btn-back:hover {
+            background-color: #4b5563;
+        }
+        p {
+            color: #4b5563;
+            margin: 8px 0;
+            font-size: 0.95rem;
+        }
+        p strong {
+            color: #1f2937;
+        }
     </style>
 </head>
 <body>
-    <h1>ECC File Decryption</h1>
+    <nav>
+        <div class="nav-container">
+            <div class="nav-logo">
+                <div class="bg-white rounded-full w-5 h-5"></div>
+                <span>GROUP 1</span>
+            </div>
+            <div class="nav-links space-x-2">
+                <a href="index.html">Home</a>
+                <a href="#" onclick = "navigateTo('sign.html'); return False ;">Sign</a>
+                <a href="verify.html">Verify</a>
+                <a href="encrypt.html">Encrypt</a>
+                <a href="#"onclick="navigateTo('decrypt.html'); return false;"><strong>Decrypt</strong></a>
+            </div>
+        </div>
+    </nav>
     <div class="container">
-        <h2>Connect to MetaMask</h2>
-        <button class="btn-primary" onclick="connectMetaMask()">Connect Wallet</button>
-        <p><strong>Wallet Address:</strong> <span id="walletAddress">Not Connected</span></p>
+        <h1>ECC File Decryption</h1>
 
-        <h2>Decrypt File</h2>
-        <input type="file" id="encryptedFile">
-        <button class="btn-danger" onclick="decryptFile()">Decrypt & Download</button>
+        <div class="section">
+            <h2>Connect to MetaMask</h2>
+            <button class="btn-primary" onclick="connectMetaMask()">
+                <i class="fas fa-wallet"></i> Connect Wallet
+            </button>
+            <p><strong>Wallet Address:</strong> <span id="walletAddress">Not Connected</span></p>
+        </div>
 
-        <button class="btn-back" onclick="goBack()">Back to Main Page</button>
+        <div class="section">
+            <h2>Decrypt File</h2>
+            <div class="file-input-container">
+                <i class="fas fa-file-upload"></i>
+                <input type="file" id="encryptedFile">
+            </div>
+            <button class="btn-danger" onclick="decryptFile()">
+                <i class="fas fa-unlock"></i> Decrypt & Download
+            </button>
+        </div>
+
+        <button class="btn-back" onclick="goBack()">
+            <i class="fas fa-arrow-left"></i> Back to Main Page
+        </button>
     </div>
 
     <script>
@@ -48,8 +180,7 @@
                     const checksumAddress = web3.utils.toChecksumAddress(userAccount);
                     document.getElementById("walletAddress").textContent = checksumAddress;
                 } else {
-                    alert("No wallet connected. Please connect on the main page.");
-                    window.location.href = "index.html";
+                    alert("No wallet connected. Please connect your MetaMask wallet.");
                 }
             } else {
                 alert("MetaMask is not installed. Please install it to use this feature.");
@@ -100,20 +231,16 @@
                         throw new Error("Invalid encrypted file format! Expected filename, data, and address.");
                     }
 
-                    // Chuyển địa chỉ ví từ MetaMask thành dạng checksum
                     const checksumUserAccount = web3.utils.toChecksumAddress(userAccount);
 
-                    // So sánh địa chỉ ví dưới dạng checksum
                     if (encryptedData.address !== checksumUserAccount) {
                         alert("This file was encrypted with a different wallet address! Expected: " + encryptedData.address);
                         return;
                     }
 
-                    // Sử dụng địa chỉ ví dạng checksum làm khóa giải mã
                     const decryptionKey = checksumUserAccount;
                     console.log("Decryption key (wallet address):", decryptionKey);
 
-                    // Giải mã dữ liệu
                     let decrypted;
                     try {
                         decrypted = CryptoJS.AES.decrypt(encryptedData.data, decryptionKey);
@@ -121,7 +248,6 @@
                         throw new Error("Decryption failed: Invalid key or corrupted data. " + error.message);
                     }
 
-                    // Chuyển dữ liệu giải mã thành chuỗi Base64
                     let decryptedBase64;
                     try {
                         decryptedBase64 = decrypted.toString(CryptoJS.enc.Utf8);
@@ -134,7 +260,6 @@
                     }
                     console.log("Decrypted Base64 content:", decryptedBase64);
 
-                    // Chuyển Base64 thành binary
                     let binaryString;
                     try {
                         binaryString = atob(decryptedBase64);
@@ -143,14 +268,12 @@
                     }
                     console.log("Binary string length:", binaryString.length);
 
-                    // Chuyển binary string thành Uint8Array
                     const byteArray = new Uint8Array(binaryString.length);
                     for (let i = 0; i < binaryString.length; i++) {
                         byteArray[i] = binaryString.charCodeAt(i);
                     }
                     console.log("Byte array:", byteArray);
 
-                    // Tải file giải mã
                     const blob = new Blob([byteArray], { type: "application/octet-stream" });
                     const link = document.createElement("a");
                     link.href = URL.createObjectURL(blob);
