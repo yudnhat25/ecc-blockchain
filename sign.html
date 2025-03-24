@@ -1,31 +1,111 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign Message</title>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>ECC Message & File Signing</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.7.4/web3.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet"/>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; background-color: #f4f4f9; }
-        .container { width: 60%; margin: auto; text-align: left; background: white; padding: 20px; border-radius: 10px; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1); }
-        textarea { width: calc(100% - 20px); padding: 10px; margin: 10px 0; display: block; }
-        button { padding: 10px; margin-top: 10px; cursor: pointer; border: none; border-radius: 5px; font-weight: bold; }
-        .btn-success { background-color: #28a745; color: white; }
-        .btn-success:hover { background-color: #1e7e34; }
-        .btn-back { background-color: #007bff; color: white; }
-        .btn-back:hover { background-color: #0056b3; }
-        h1, h2 { color: #333; }
-        p { font-size: 14px; color: #555; }
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+        nav {
+            background: linear-gradient(90deg, #1e3a8a, #3b82f6);
+            padding: 16px 32px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: white;
+            font-weight: 700;
+            font-size: 1.25rem;
+        }
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            transition: background-color 0.2s;
+        }
+        .nav-links a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
     </style>
 </head>
 <body>
-    <h1>Sign Message</h1>
-    <div class="container">
-        <h2>Sign a Message</h2>
-        <textarea id="messageToSign" placeholder="Enter message to sign..."></textarea>
-        <button class="btn-success" onclick="signMessage()">Sign Message</button>
-        <p><strong>Signature:</strong> <span id="signature"></span></p>
-        <button class="btn-back" onclick="goBack()">Back to Main Page</button>
+    <nav>
+        <div class="nav-container">
+            <div class="nav-logo">
+                <div class="bg-white rounded-full w-5 h-5"></div>
+                <span>GROUP 1</span>
+            </div>
+            <div class="nav-links space-x-2">
+                <a href="index.html">Home</a>
+                    <a href="#" onclick = "navigateTo('sign.html'); return False ;"><strong>Sign</strong></a>
+                    <a href="verify.html">Verify</a>
+                    <a href="encrypt.html">Encrypt</a>
+                    <a href="#"onclick="navigateTo('decrypt.html'); return false;">Decrypt</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-2xl mx-auto bg-white p-8 mt-10 rounded-lg shadow-lg">
+        <h1 class="text-3xl font-bold text-blue-900 text-center mb-6">
+            ECC Message & File Signing
+        </h1>
+        <div class="bg-gray-100 p-6 rounded-lg mb-6">
+            <h2 class="text-xl font-medium text-gray-800 mb-4">
+                Sign Message
+            </h2>
+            <p class="text-gray-700 mb-2">
+                <strong>Enter Message to Sign:</strong>
+            </p>
+            <textarea class="w-full p-3 border border-gray-300 rounded mb-4" id="message" placeholder="Enter your message here..."></textarea>
+            <button class="bg-green-500 text-white px-4 py-2 rounded flex items-center gap-2 hover:bg-green-600" onclick="signMessage()">
+                <i class="fas fa-signature"></i> Sign Message
+            </button>
+            <p class="text-gray-700 mt-4">
+                <strong>Generated File:</strong> message_signature.txt
+            </p>
+        </div>
+        <div class="bg-gray-100 p-6 rounded-lg mb-6">
+            <h2 class="text-xl font-medium text-gray-800 mb-4">
+                Sign File
+            </h2>
+            <p class="text-gray-700 mb-2">
+                <strong>Select File to Sign:</strong>
+            </p>
+            <div class="flex items-center gap-3 mb-4">
+                <i class="fas fa-file-upload text-gray-600"></i>
+                <input class="p-2 border border-gray-300 rounded" id="fileInput" type="file"/>
+            </div>
+            <button class="bg-green-500 text-white px-4 py-2 rounded flex items-center gap-2 hover:bg-green-600" onclick="signFile()">
+                <i class="fas fa-signature"></i> Sign File
+            </button>
+            <p class="text-gray-700 mt-4">
+                <strong>Generated File:</strong> file_signature.txt
+            </p>
+        </div>
+        <button class="bg-gray-600 text-white px-4 py-2 rounded flex items-center gap-2 hover:bg-gray-700" onclick="goBack()">
+            <i class="fas fa-arrow-left"></i> Back to Main Page
+        </button>
     </div>
 
     <script>
@@ -46,19 +126,71 @@
             }
         };
 
-        function signMessage() {
-            const message = document.getElementById("messageToSign").value;
+        async function signMessage() {
+            const message = document.getElementById("message").value.trim();
+
             if (!message) {
                 alert("Please enter a message to sign!");
                 return;
             }
-            web3.eth.personal.sign(message, userAccount, (err, signature) => {
-                if (err) {
-                    alert("Signing failed!");
-                } else {
-                    document.getElementById("signature").textContent = signature;
+
+            if (!userAccount) {
+                alert("Please connect to MetaMask first!");
+                return;
+            }
+
+            try {
+                const signature = await web3.eth.personal.sign(message, userAccount);
+                console.log("Message signature:", signature);
+                downloadFile("message_signature.txt", signature);
+            } catch (error) {
+                console.error("Message signing failed:", error);
+                alert("Message signing failed: " + error.message);
+            }
+        }
+
+        async function signFile() {
+            const file = document.getElementById("fileInput").files[0];
+
+            if (!file) {
+                alert("Please select a file to sign!");
+                return;
+            }
+
+            if (!userAccount) {
+                alert("Please connect to MetaMask first!");
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = async function(event) {
+                try {
+                    const fileContent = event.target.result;
+                    const fileHash = CryptoJS.SHA256(fileContent).toString();
+                    console.log("File hash:", fileHash);
+
+                    const signature = await web3.eth.personal.sign(fileHash, userAccount);
+                    console.log("File signature:", signature);
+
+                    downloadFile("file_signature.txt", signature);
+                } catch (error) {
+                    console.error("File signing failed:", error);
+                    alert("File signing failed: " + error.message);
                 }
-            });
+            };
+            reader.onerror = function(event) {
+                console.error("File reading failed:", event);
+                alert("Failed to read the file: " + event.target.error.message);
+            };
+            reader.readAsText(file);
+        }
+
+        function downloadFile(filename, content) {
+            const blob = new Blob([content], { type: "text/plain" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = filename;
+            link.click();
         }
 
         function goBack() {
